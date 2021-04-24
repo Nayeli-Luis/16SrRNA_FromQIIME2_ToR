@@ -14,7 +14,7 @@ source("scripts/funs_rarefy.R")
 
 The dataset that QIIME2 returns is called `observed_features.csv` and it
 was obtained with the `qiime diversity alpha-rarefaction plugin`.
-Usually, the dataset has a column for samples names (`sample-id`) at the
+Usually, the dataset has a column for samples names (`sample_id`) at the
 begining and other categorical columns like `description`, `site`, etc.
 at the end it depends on your project.
 
@@ -22,7 +22,7 @@ The dataset looks like this:
 
 To use the functions contained in `funs_rarefy.R` you have to choose one
 character column, your sample ids or a categorical variable. In this
-case I’ll use my sample-ids, at the of this dataset I have a categorical
+case I’ll use my sample-ids, at the end of this dataset I have a categorical
 variable called `site`, I’ll delete it.
 
 ``` r
@@ -61,7 +61,7 @@ obs %<>% select(-site)
 
 ## Process
 
-### First step: Data clean
+### First step: Data cleaning
 
 We have to clean the colnames of the dataset, in order to obtain only
 the depth of reads and the number of the iterations. Remember that for
@@ -127,7 +127,7 @@ obs2[[1]]
     ##  9 7200   848.  5.52
     ## 10 9000   873.  6.68
 
-### Third step: More data clean
+### Third step: More data cleaning
 
 So, at this time we have the mean and sd of the 10 iterations for each
 depth. Now, we have to transform the column `Depth` to a numeric and
