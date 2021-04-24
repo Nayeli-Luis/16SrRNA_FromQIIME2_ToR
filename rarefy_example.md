@@ -139,7 +139,7 @@ use the function `clean_rarefy_data2()`.
 **Parameters**: `L`: The list obtained in the last step.
 
 ``` r
-obs3 <- clean_rarefy_data2(obs1)
+obs3 <- clean_rarefy_data2(obs2)
 class(obs3)
 ```
 
