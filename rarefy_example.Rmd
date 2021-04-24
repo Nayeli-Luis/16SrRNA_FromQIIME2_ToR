@@ -18,7 +18,7 @@ source("scripts/funs_rarefy.R")
 ## Dataset preparation
 
 The dataset that QIIME2 returns is called `observed_features.csv` and it was obtained with the `qiime diversity alpha-rarefaction plugin`. 
-Usually, the dataset has a column for samples names (`sample-id`) at the begining  and other categorical columns like `description`, `site`, etc. at the end it depends on your project.  
+Usually, the dataset has a column for samples names (`sample_id`) at the begining  and other categorical columns like `description`, `site`, etc. at the end it depends on your project.  
 
 The dataset looks like this:
 
