@@ -133,7 +133,7 @@ obs2[[1]]
 
 So, at this time we have the mean and sd of the 10 iterations for each
 depth. Now, we have to transform the column `Depth` to a numeric and
-unite all the list objects in a only dataset. In order to do this, we
+unite all objects in the list into one dataset. In order to do this, we
 use the function `clean_rarefy_data2()`.
 
 **Parameters**: `L`: The list obtained in the last step.
