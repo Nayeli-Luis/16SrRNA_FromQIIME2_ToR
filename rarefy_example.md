@@ -68,10 +68,12 @@ the depth of reads and the number of the iterations. Remember that for
 each depth there are 10 iterations. The first function
 (`clean_rarefy_data()`) do that.
 
-**Parameters** of `clean_rarefy_data()`: `data` : A dataset with just
-one categorical column. `catCol`: 1 or 101, the number represents de
-number of the categorical column, could be: - 1 if your column are at
-the beginig - 101 if you column are at the end
+**Parameters** of `clean_rarefy_data()`: 
+- `data` : A dataset with just
+one categorical column. 
+- `catCol`: 1 or 101, the number represents de
+number of the categorical column, could be: 1 if your column are at
+the beginig or 101 if you column are at the end
 
 **Output**: A list, each object of that list is a dataset. The number of
 datasets contained in the list depends on the number of samples or
