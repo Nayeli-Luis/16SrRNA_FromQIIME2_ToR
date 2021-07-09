@@ -21,7 +21,7 @@ From these file, we will create others, which are the ones that will be
 import into `phyloseq`. These are: `feature-table.tsv` and
 `otu_tax_matrix.csv`.
 
-## The preparation
+## Data preparation
 
 ### feature-table.tsv\`
 
