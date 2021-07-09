@@ -1,5 +1,6 @@
 Files preparation and importing to `phyloseq`
 ================
+Luis-Vargas Maira N
 
 ## What is `phyloseq`?
 
