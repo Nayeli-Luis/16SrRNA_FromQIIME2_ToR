@@ -262,7 +262,7 @@ head(otu.tax.copy)
 We want to know the taxonomic classification of the ASVs that are
 present in all sites, I mean, the ASVs with 1 in all the sites.
 
-So, first, we’ll create a vector with that ASVs.
+So, first, we'll create a vector with that ASVs.
 
 ``` r
 asv_interest <- count_matrix %>%
@@ -284,7 +284,7 @@ length(asv_interest)
 
     ## [1] 142
 
-Then we’ll search that OTUIDs in `otu.tax.copy`.
+Then we'll search that OTUIDs in `otu.tax.copy`.
 
 ``` r
 tax_asv <- filter(otu.tax.copy, OTUID %in% asv_interest)
