@@ -1,5 +1,6 @@
 Rarefy clean data and plot
 ================
+Luis-Vargas Maira N
 
 ## Resource
 
