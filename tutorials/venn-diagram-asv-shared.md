@@ -16,9 +16,9 @@ library(limma)
 # Data preparation
 
 We’ll use the `otu_tax_matrix.csv` file, it was generated with
-`taxonomy.tsv` file and `feature-table.tsv` file (see the tuto ’(Files
+`taxonomy.tsv` file and `feature-table.tsv` file (see the tuto "[Files
 preparation and importing to
-`phyloseq`)\[<https://github.com/Nayeli-Luis/16SrRNA_FromQIIME2_ToR/blob/main/tutorials/phyloseq-files-preparation-importing.md>\]).
+`phyloseq`"](<https://github.com/Nayeli-Luis/16SrRNA_FromQIIME2_ToR/blob/main/tutorials/phyloseq-files-preparation-importing.md>\)).
 
 The colnames of the `otu_tax_matrix.csv` looks like this:
 
