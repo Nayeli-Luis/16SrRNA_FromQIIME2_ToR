@@ -5,7 +5,7 @@ Files preparation and importing to `phyloseq`
 
 `phyloseq` is a R package which brings tools in order to analyse
 microbial communities from many types of data. The Github of `phyloseq`
-([click here](https://joey711.github.io/phyloseq/), has many tutorials
+([click here](https://joey711.github.io/phyloseq/)), has many tutorials
 for make several analysis and data visualization. But, in my opinion, is
 unclear how the data must be imported, in this tutorial I hope to show
 an easy way to import data for using `phyloseq`.
