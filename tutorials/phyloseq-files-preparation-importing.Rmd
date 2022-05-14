@@ -1,0 +1,146 @@
+---
+title: "Files preparation and importing to `phyloseq`"
+author: "Luis-Vargas, Maira N."
+output: github_document
+always_allow_html: true
+---
+
+email: nayeli.luis@ciencias.unam.mx
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## What is `phyloseq`?
+
+`phyloseq` is a R package which brings tools in order to analyse microbial communities from many types of data. The Github  of `phyloseq` ([click here](https://joey711.github.io/phyloseq/), has many tutorials for make several analysis and data visualization. But, in my opinion, is unclear how the data must be imported, in this tutorial I hope to show an easy way to import data for using `phyloseq`. 
+
+## First of all
+
+We need four files, three of these files are insde `.qza` directories from QIIME2, the last one is your `sample-metadata.csv' file. The next table shows the directories where the files are, you just have to unzip them.
+
+```{r, include=TRUE, echo=FALSE, message=FALSE}
+
+library(kableExtra)
+
+files <- data.frame(
+  Directory = c("table.qza", "unrooted-tree.qza", "taxonomy.qza", ""),
+  Files = c("feature-table.biom", "tree.nwk", "taxonomy.tsv", "sample-metadata. csv"))
+
+kbl(files, "latex" ,caption = "Necessary files",
+    align = c("c", "c"),
+    escape = FALSE, 
+    booktabs = TRUE,
+    linesep = "") %>%
+  kable_paper("hover", full_width = T)
+```
+
+From these file, we will create others, which are the ones that will be import into `phyloseq`. These are: `feature-table.tsv` and `otu_tax_matrix.csv`. 
+
+## The preparation
+
+### `feature-table.tsv`
+
+To get the `feature-table.tsv` file we need to transform the `biom` file. If you want to know what a biom file is, yo can go to the [Biom page](https://biom-format.org). In this case we have to transform the `biom` file in a `.tsv` file. For that you'll active your QIIME2 and copy-paste the next comand. 
+
+`biom convert -i feature-table.biom -o feature-table.tsv --to-tsv`
+
+
+The `.tsv` file looks like this:
+
+```{r, message=FALSE}
+library(tidyverse)
+library(magrittr)
+
+asv_table <- read.table("../datasets/feature-table.tsv", sep = "\t")
+head(asv_table)
+```
+
+The first column is the FeatureID (ASV) and the next ones are the samples. So, the next step is put column names and we can do this importing the `sample-metadata.csv` file, passing the names of the samples as columnames. 
+
+```{r}
+
+metadata <- read.csv("../datasets/sample-metadata.csv", row.names = 1)
+sample.names <- rownames(metadata)
+
+colnames(asv_table) <- c("Feature.ID", sample.names)
+
+head(asv_table)
+
+```
+
+Our first file (`feature-table.tsv`) is ready!
+
+
+### `otu_tax_matrix.csv`. 
+
+This file has the OTUIDs, the taxonomy and the samples, and the taxonomy should be separated. I mean, each taxonomic hierarchy must be in a column. To get this file we need the `taxonomy.tsv` file and the `feature-table.tsv`.  
+
+First, the `taxonomy.tsv` has three columns: `Feature.ID`, `Taxon` and `Confidence`. 
+
+```{r}
+
+tax <- read.table("../datasets/taxonomy.tsv", sep = '\t', header = T)
+colnames(tax)
+
+```
+
+The first step is delete the column `Confidence`. Next, we'll rename the column  `Feature.ID` in `OTUID`, because we will merge the datasets by this column. And finally, we'll separate the column `Taxon` in different columns. 
+
+```{r, message=FALSE, warning=FALSE}
+tax %<>% 
+  select(-Confidence) %>%
+  separate(Taxon, c("Kingdom", "Phylum"), sep = "; p__") %>%
+  separate(Phylum, c("Phylum", "Class"), sep = "; c__") %>%
+  separate(Class, c("Class", "Order"), sep = "; o__") %>%
+  separate(Order, c("Order", "Family"), sep = "; f__") %>%
+  separate(Family, c("Family", "Genus"), sep = "; g__") %>%
+  separate(Genus, c("Genus", "Specie"), sep = "; s__") %>%
+  mutate_all(na_if,"")
+
+tax$Kingdom <- sub (pattern = "d__", replacement = "", 
+                       tax$Kingdom)
+
+head(tax)
+```
+
+And, we'll merge the datasets. In order to have all de taxonomy with the number of seqs by ASV and by sample.
+
+```{r}
+asv_matrix <- merge(x = asv_table, y = tax, by = "Feature.ID")
+head(asv_matrix)
+```
+
+## Importing datasets to `phyloseq`
+
+Finally, we can import our data to `phyloseq`:
+
+```{r}
+library(phyloseq)
+
+# Column Feature.ID as rownames in the asv_table
+rownames(asv_table) <- asv_table$Feature.ID
+asv_table %<>% select(-Feature.ID)
+
+# Column Feature.ID as rownames in the df taxonomy
+rownames(tax) <- tax$Feature.ID
+tax %<>%
+  select(-Feature.ID) %>%
+   as.matrix(.) # Convert to a matrix
+
+
+ASV <- otu_table(asv_table, taxa_are_rows = TRUE)
+TAX <- tax_table(tax)
+metadata <- sample_data(metadata)
+phy_tree <- read_tree("../datasets/tree.nwk")
+
+phyloseq_object <- phyloseq(ASV, TAX, metadata, phy_tree)
+phyloseq_object
+```
+
+I recommend you to save this physeq object as a RDS
+
+```{r}
+ps <- saveRDS(phyloseq_object, "../datasets/phyloseq_object.RDS")
+```
+

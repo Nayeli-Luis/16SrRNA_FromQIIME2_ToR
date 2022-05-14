@@ -1,6 +1,8 @@
 Relative Abundance
 ================
-Luis-Vargas Maira N
+Luis-Vargas, Maira N.
+
+email: <nayeli.luis@ciencias.unam.mx>
 
 ## Relative abundance
 
@@ -23,27 +25,17 @@ hierarchy (level). See the image below.
   knitr::include_graphics("../images/taxaBarplots.png")
 ```
 
-<div class="figure" style="text-align: center">
-
-<img src="../images/taxaBarplots.png" alt="Taxa barplots from QIIME2 .\label{taxaBarplot}" width="90%" height="90%" />
-
-<p class="caption">
-
-Taxa barplots from QIIME2 .
-
-</p>
-
-</div>
+<img src="../images/taxaBarplots.png" title="Taxa barplots from QIIME2 .\label{taxaBarplot}" alt="Taxa barplots from QIIME2 .\label{taxaBarplot}" width="90%" height="90%" style="display: block; margin: auto;" />
 
 Remember:
 
-  - level-1: Domain
-  - level-2: Phylum
-  - level-3: Class
-  - level-4: Order
-  - level-5: Family
-  - level-6: Genus
-  - level-7: Specie
+-   level-1: Domain
+-   level-2: Phylum
+-   level-3: Class
+-   level-4: Order
+-   level-5: Family
+-   level-6: Genus
+-   level-7: Specie
 
 In “denoising-stats.csv” we have several columns indicating the number
 of recovered sequences after each process of quality control.
@@ -94,15 +86,16 @@ names: 1) a column called ‘index’ which contains your samples ids,
 
 ``` r
 phy <- read.csv("../datasets/level-2.csv", header = TRUE)
-head(phy$index, 10)
+phy$index
 ```
 
-    ##  [1] "A1"  "A2"  "A3"  "A4"  "A5"  "A6"  "A7"  "A8"  "A9"  "A10"
+    ##  [1] "A1"  "A2"  "A3"  "A4"  "A5"  "A6"  "A7"  "A8"  "A9"  "A10" "A11" "A12"
+    ## [13] "A13" "A14" "A15" "A16" "A17" "A18" "A19" "A20" "A21" "A22" "A23" "A24"
+    ## [25] "B1"  "B2"  "B3"  "B4"  "B5"  "B6"  "B7"  "B8"  "B9"  "B10" "B11" "B12"
+    ## [37] "B13" "B14" "B15" "B16" "B17" "B18" "B19" "B20" "B21" "B22" "B23" "B24"
 
 2)  Several columns with the taxonomy at the level of phylum including
     the domain,
-
-<!-- end list -->
 
 ``` r
 head(colnames(phy))
@@ -114,7 +107,7 @@ head(colnames(phy))
 
 and , 3) at the end the dataset, the categorical varibles you assigned
 in your sample-metadata file. In this case, the categorical varibles are
-‘sample\_type’ and ‘site’.
+‘sample_type’ and ‘site’.
 
 ``` r
 tail(colnames(phy))
@@ -131,20 +124,19 @@ phy %<>%
   select(-c(sample_type, site)) 
 ```
 
-Then, you can use the function `rel_ab(dataTax, dataTotSeq, iTax,
-iTotSeq)` which is contained in “fun\_relative\_abundance.R” in
-“scripts” directory. This function has four parameters:
+Then, you can use the function
+`rel_ab(dataTax, dataTotSeq, iTax, iTotSeq)` which is contained in
+“fun_relative_abundance.R” in “scripts” directory. This function has
+four parameters:
 
-  - `dataTax`: Dataset with groups of a taxonomic hierarchy (this case,
-    phy from ‘level-2.csv’ file.)
-  - `dataTotSeq`: Dataset with the samples names and the number of total
-    sequences by sample.
-  - `iTax`: Column number where the samples names are found in
-    datasetTax (usually 1)
-  - `iTotSeq`: Column number where the samples names are found in
-    datasetTax (usually 1).
-
-<!-- end list -->
+-   `dataTax`: Dataset with groups of a taxonomic hierarchy (this case,
+    `phy` from ‘level-2.csv’ file.)
+-   `dataTotSeq`: Dataset with the samples names and the number of total
+    sequences (`non.chimeric`) by sample.
+-   `iTax`: Column number where the samples names are found in dataTax
+    (usually 1)
+-   `iTotSeq`: Column number where the samples names are found in
+    dataTax (usually 1).
 
 ``` r
 source("../scripts/fun_relative_abundance.R")
@@ -156,6 +148,8 @@ Now, we have the proportion form each phylum detected by sample in the
 dataset `relative.abundance.phy`.
 
 ``` r
+# Avoid scientific notation
+options(scipen = 999999)
 head(relative.abundance.phy[1:5], 5)
 ```
 
@@ -166,11 +160,11 @@ head(relative.abundance.phy[1:5], 5)
     ## 4             0                  0.0001470740                             0
     ## 5             0                  0.0001458911                             0
     ##   d__Archaea.p__Crenarchaeota d__Archaea.p__Euryarchaeota
-    ## 1                0.0010653173                0.000000e+00
-    ## 2                0.0004588878                0.000000e+00
-    ## 3                0.0004694836                0.000000e+00
-    ## 4                0.0187056395                2.995953e-05
-    ## 5                0.0052489772                0.000000e+00
+    ## 1                0.0010653173               0.00000000000
+    ## 2                0.0004588878               0.00000000000
+    ## 3                0.0004694836               0.00000000000
+    ## 4                0.0187056395               0.00002995953
+    ## 5                0.0052489772               0.00000000000
 
 As you can notice, we lost our samples names, let’s recover them.
 
@@ -186,15 +180,15 @@ head(relative.abundance.phy[1:5], 5)
     ## A4             0                  0.0001470740                             0
     ## A5             0                  0.0001458911                             0
     ##    d__Archaea.p__Crenarchaeota d__Archaea.p__Euryarchaeota
-    ## A1                0.0010653173                0.000000e+00
-    ## A2                0.0004588878                0.000000e+00
-    ## A3                0.0004694836                0.000000e+00
-    ## A4                0.0187056395                2.995953e-05
-    ## A5                0.0052489772                0.000000e+00
+    ## A1                0.0010653173               0.00000000000
+    ## A2                0.0004588878               0.00000000000
+    ## A3                0.0004694836               0.00000000000
+    ## A4                0.0187056395               0.00002995953
+    ## A5                0.0052489772               0.00000000000
 
 Usually, we want to know the most abundant taxa in the samples. So, we
 can filter the dataset with the function `filter_abundances()` in the
-script “fun\_relative\_abundance.R” in “scripts” directory. The function
+script `fun_relative_abundance.R` in `scripts/` directory. The function
 `filter_abundances()` has two parameters: - `dataRelAb`: The dataset
 with the relative abundances of each taxa (in this case
 ‘relative.abundance.phy’). - `filterValue`: The minimum value of
@@ -220,6 +214,12 @@ head(phy.filtered[1:5], 5)
     ## d__Bacteria.p__Chloroflexi      0.04125155 0.028611737
     ## d__Bacteria.p__Cyanobacteria    0.00261465 0.001548929
 
+``` r
+dim(phy.filtered)
+```
+
+    ## [1]  9 48
+
 And, It only remains to clear the names of the phyla.
 
 ``` r
@@ -243,25 +243,22 @@ must be 1, but, because of we just select the most abundat taxa, our sum
 will be less than 1.
 
 ``` r
-phy.data %>%
-  select(-Phylum) %>%
-  summarise_all(sum)
+options(scipen = 9999)
+colSums(phy.data[-1])
 ```
 
-    ##          A1        A2        A3        A4        A5        A6        A7
-    ## 1 0.8436647 0.8149431 0.8297027 0.8564612 0.9174179 0.9237801 0.8743148
-    ##          A8        A9       A10       A11       A12       A13       A14
-    ## 1 0.8967831 0.9019758 0.8957768 0.9038895 0.8896359 0.8532599 0.8614741
-    ##         A15       A16       A17       A18       A19       A20       A21
-    ## 1 0.8877661 0.7925261 0.8792344 0.8783366 0.8525158 0.8750713 0.8728897
-    ##         A22       A23       A24        B1        B2        B3        B4
-    ## 1 0.9074493 0.9190625 0.9088739 0.9093883 0.9041883 0.9289589 0.8003762
-    ##          B5        B6        B7        B8        B9       B10       B11
-    ## 1 0.8398433 0.8917164 0.9447753 0.9013743 0.9226801 0.9653996 0.9740373
-    ##         B12       B13       B14       B15       B16       B17       B18
-    ## 1 0.9758169 0.9655164 0.9700994 0.9788416 0.8973459 0.9516367 0.9369726
-    ##         B19       B20       B21       B22       B23       B24
-    ## 1 0.7925642 0.8030281 0.8281599 0.8678804 0.9373499 0.9273442
+    ##        A1        A2        A3        A4        A5        A6        A7        A8 
+    ## 0.8436647 0.8149431 0.8297027 0.8564612 0.9174179 0.9237801 0.8743148 0.8967831 
+    ##        A9       A10       A11       A12       A13       A14       A15       A16 
+    ## 0.9019758 0.8957768 0.9038895 0.8896359 0.8532599 0.8614741 0.8877661 0.7925261 
+    ##       A17       A18       A19       A20       A21       A22       A23       A24 
+    ## 0.8792344 0.8783366 0.8525158 0.8750713 0.8728897 0.9074493 0.9190625 0.9088739 
+    ##        B1        B2        B3        B4        B5        B6        B7        B8 
+    ## 0.9093883 0.9041883 0.9289589 0.8003762 0.8398433 0.8917164 0.9447753 0.9013743 
+    ##        B9       B10       B11       B12       B13       B14       B15       B16 
+    ## 0.9226801 0.9653996 0.9740373 0.9758169 0.9655164 0.9700994 0.9788416 0.8973459 
+    ##       B17       B18       B19       B20       B21       B22       B23       B24 
+    ## 0.9516367 0.9369726 0.7925642 0.8030281 0.8281599 0.8678804 0.9373499 0.9273442
 
 If you want, you can add an observation called “Others”, it refers the
 other taxa that have a ratio less than 0.10. And you can add a row with
@@ -272,8 +269,8 @@ other taxa that have a ratio less than 0.10. And you can add a row with
 ``` r
 source("../scripts/fun_relative_abundance.R")
 
-phy.data1 <- other_row(phy.data, 1) 
-head(phy.data1[1:5], 10)
+phy.data.other <- other_row(phy.data, 1) 
+head(phy.data.other[1:5], 10)
 ```
 
     ##               Phylum          A1           A2           A3         A4
@@ -295,13 +292,13 @@ for choose palettes:
 [Coolors](https://coolors.co/54494b-7e8287-9da39a-b98389-db2955).
 
 ``` r
-phy.names <- phy.data1$Phylum
-phy.data1$Phylum <- factor(phy.data1$Phylum, levels = rev(phy.names))
+phy.names <- phy.data.other$Phylum
+phy.data.other$Phylum <- factor(phy.data.other$Phylum, levels = rev(phy.names))
 
 my_colors <- c("#CBCDCC", "#CB7C95", "#8C97BA", "#97895E", "#388894",
                "#83A8EC", "#568259", "#97D274", "#4281A4", "#F9DC5C")
 
-taxbarplot <- phy.data1 %>%
+taxbarplot <- phy.data.other %>%
   pivot_longer(cols = (2:length(colnames(.)))) %>%
   ggplot(aes(x = name, y = value, fill = Phylum)) +
   scale_fill_manual(values = my_colors) +
@@ -316,4 +313,4 @@ taxbarplot <- phy.data1 %>%
 taxbarplot
 ```
 
-![](relative-abundance_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](relative-abundance_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->

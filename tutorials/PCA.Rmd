@@ -1,0 +1,55 @@
+---
+title: "Principal Component Analysis"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# PCA
+
+PCA is an analysis for reduce the dimensionality of multivariate data, the main is to found which variables can explain the most of the variability of our data. I order to do this, a PCA generates new variables (components) not correlated. 
+
+The data in this example are physicochemical parameteres from 60 sites, 30 for rainy season and 30 for dry season. The parameters are:
+  * Tº - Temperature
+  * CE - Electrical conductivity
+  * DO - Dissolved oxyen
+  * pH
+  * TOC - Total organic carbon
+  * IC - Inorganic carbon
+  * TN - Total nitrogen
+
+So, we want to know which variables can explain the variability of our data. 
+
+## Libraries required: 
+
+```{r}
+library(tidyverse)
+library(factoextra)
+```
+
+## Data
+
+```{r}
+fc <- read.csv("envrionment_parameters.csv")
+colnames(fc) <- c("season", " point", "Tº", "CE", "DO", "pH", "TOC", "IC", "TN")
+head(fc)
+```
+
+## Make a PCA
+
+The function to do the analysis is `prcomp()`, it inclues a boolean parameter `scale` in order to standardize the data. It is importat make an standarization because increasing the accuracy of the analysis, each variable contributes equally to the PCA. And we avoid biases due to different scale between variables.
+
+```{r}
+pca_fc <- prcomp(fc[,-c(1:2)], scale. = TRUE)
+pca_fc
+```
+In this step, we have our components, I mean, our new not correlated variables.
+Then, it is important to chek the correlation betwwen the variables and the dimensions. 
+
+```{r}
+var <- get_pca_var(pca_fc)
+head(var$cor)
+```
+

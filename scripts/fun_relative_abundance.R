@@ -20,7 +20,7 @@ filter_abundances <- function(dataRelAb, filterValue){
   dataRelAb %>% 
     t() %>%
     as.data.frame() %>%
-    filter_all(any_vars(. > filterValue))
+    filter(if_any(everything(), ~ . > filterValue))
 }
 
 # Add "Other"

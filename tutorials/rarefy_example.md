@@ -1,6 +1,8 @@
 Rarefy clean data and plot
 ================
-Luis-Vargas Maira N
+Luis-Vargas, Maira N.
+
+email: <nayeli.luis@ciencias.unam.mx>
 
 ## Resource
 
@@ -8,42 +10,19 @@ All the functions are contained in `funs_rarefy.R` in `scripts`
 directory.
 
 ``` r
-source("../scripts/funs_rarefy.R")
-```
-
-## Dataset preparation
-
-The dataset that QIIME2 returns is called `observed_features.csv` and it
-was obtained with the `qiime diversity alpha-rarefaction plugin`.
-Usually, the dataset has a column for samples names (`sample_id`) at the
-begining and other categorical columns like `description`, `site`, etc.
-at the end it depends on your project.
-
-The dataset looks like this:
-
-To use the functions contained in `funs_rarefy.R` you have to choose one
-character column, your sample ids or a categorical variable. In this
-case I’ll use my sample-ids, at the of this dataset I have a categorical
-variable called `site`, I’ll delete it.
-
-``` r
-library(tidyverse)
+source("../scripts/funs_rarefy2.R")
 ```
 
     ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
 
-    ## ✓ ggplot2 3.3.3     ✓ purrr   0.3.4
-    ## ✓ tibble  3.1.1     ✓ dplyr   1.0.6
-    ## ✓ tidyr   1.1.3     ✓ stringr 1.4.0
-    ## ✓ readr   1.4.0     ✓ forcats 0.5.1
+    ## ✔ ggplot2 3.3.6     ✔ purrr   0.3.4
+    ## ✔ tibble  3.1.7     ✔ dplyr   1.0.9
+    ## ✔ tidyr   1.2.0     ✔ stringr 1.4.0
+    ## ✔ readr   2.1.2     ✔ forcats 0.5.1
 
     ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ## x dplyr::filter() masks stats::filter()
-    ## x dplyr::lag()    masks stats::lag()
-
-``` r
-library(magrittr)
-```
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
 
     ## 
     ## Attaching package: 'magrittr'
@@ -56,154 +35,174 @@ library(magrittr)
     ## 
     ##     extract
 
-``` r
-obs %<>% select(-site)
-```
+## Dataset preparation
 
-## Process
+The dataset that QIIME2 returns is called `observed_features.csv` and it
+was obtained with the `qiime diversity alpha-rarefaction plugin`.
+Usually, the dataset has a column for samples names (`sample_id`) at the
+begining and other categorical columns like `description`, `site`, etc.
+at the end it depends on your project.
 
-### First step: Data cleaning
+The dataset looks like this:
 
-We have to clean the colnames of the dataset, in order to obtain only
-the depth of reads and the number of the iterations. Remember that for
-each depth there are 10 iterations. The first function
-(`clean_rarefy_data()`) do that.
+## First step: Data cleaning
 
-**Parameters** of `clean_rarefy_data()`: - `data` : A dataset with just
-one categorical column. - `catCol`: 1 or 101, the number represents de
-number of the categorical column, could be: 1 if your column are at the
-beginig o 101 if you column are at the end.
-
-**Output**: A list, each object of that list is a dataset. The number of
-datasets contained in the list depends on the number of samples or
-categories you have. Each dataset contains the 10 iterations from each
-read depth.
+In order to do this we will use the function `clean_data()`. this
+function reformat the dataset and separate the columns by
+`depth_seqs()`, `iter` and `asvs`.
 
 ``` r
-obs1 <- clean_rarefy_data(obs, 1)
-obs1[[1]]
+obs_long <- clean_data(obs)
+head(obs_long)
 ```
 
-    ## # A tibble: 100 x 3
-    ##    sample_id Depth sequences
-    ##    <chr>     <chr>     <int>
-    ##  1 a1        1             1
-    ##  2 a1        1             1
-    ##  3 a1        1             1
-    ##  4 a1        1             1
-    ##  5 a1        1             1
-    ##  6 a1        1             1
-    ##  7 a1        1             1
-    ##  8 a1        1             1
-    ##  9 a1        1             1
-    ## 10 a1        1             1
-    ## # … with 90 more rows
+    ## # A tibble: 6 × 5
+    ##   sample_id site  depth_seqs iter   asvs
+    ##   <chr>     <chr> <chr>      <chr> <int>
+    ## 1 a1        A     1          1         1
+    ## 2 a1        A     1          2         1
+    ## 3 a1        A     1          3         1
+    ## 4 a1        A     1          4         1
+    ## 5 a1        A     1          5         1
+    ## 6 a1        A     1          6         1
 
-### Second step: Mean and sd
+## Second step: Get the mean of observed ASVs
 
-The second step is to obtain the average and the standard deviation of
-the number of sequences obtained in each iteration at each depth. We can
-do that with the function `rarefy_by()`.
-
-**Parameters**: `L`: The list obtained in the last step.
-
-**Output**: Another list.
+The second step is to obtain the mean aof the number of ASVs observerd
+in each iteration at each depth. first, we have to nest our dataset in
+function of a variable, could be a categorical variable or the name of
+our samples.
 
 ``` r
-obs2 <- rarefy_by(obs1)
-obs2[[1]]
+obs_nest <- obs_long %>% 
+  group_by(depth_seqs, site) %>% 
+  nest()
+head(obs_nest)
 ```
 
-    ## # A tibble: 10 x 3
-    ##    Depth  mean    sd
-    ##    <chr> <dbl> <dbl>
-    ##  1 1        1   0   
-    ##  2 10800  888.  4.35
-    ##  3 12600  900.  4.83
-    ##  4 14400  910.  3.75
-    ##  5 16200  914.  3.01
-    ##  6 1800   589  11.3 
-    ##  7 3600   750. 10.9 
-    ##  8 5400   808.  6.54
-    ##  9 7200   848.  5.52
-    ## 10 9000   873.  6.68
+    ## # A tibble: 6 × 3
+    ## # Groups:   depth_seqs, site [6]
+    ##   site  depth_seqs data              
+    ##   <chr> <chr>      <list>            
+    ## 1 A     1          <tibble [240 × 3]>
+    ## 2 A     1800       <tibble [240 × 3]>
+    ## 3 A     3600       <tibble [240 × 3]>
+    ## 4 A     5400       <tibble [240 × 3]>
+    ## 5 A     7200       <tibble [240 × 3]>
+    ## 6 A     9000       <tibble [240 × 3]>
 
-### Third step: More data cleaning
-
-So, at this time we have the mean and sd of the 10 iterations for each
-depth. Now, we have to transform the column `Depth` to a numeric and all
-objects in the list objects into one dataset. In order to do this, we
-use the function `clean_rarefy_data2()`.
-
-**Parameters**: `L`: The list obtained in the last step.
+To check the kind of object `obs_nest`:
 
 ``` r
-obs3 <- clean_rarefy_data2(obs2)
-class(obs3)
+class(obs_nest)
 ```
 
-    ## [1] "data.frame"
+    ## [1] "grouped_df" "tbl_df"     "tbl"        "data.frame"
+
+To acces data:
 
 ``` r
-head(obs3)
+obs_nest$data[[1]]
 ```
 
-    ##   category  mean        sd depth
-    ## 1       a1   1.0  0.000000     1
-    ## 2       a1 888.4  4.351245 10800
-    ## 3       a1 900.3  4.831609 12600
-    ## 4       a1 909.9  3.754997 14400
-    ## 5       a1 914.2  3.011091 16200
-    ## 6       a1 589.0 11.303883  1800
+    ## # A tibble: 240 × 3
+    ##    sample_id iter   asvs
+    ##    <chr>     <chr> <int>
+    ##  1 a1        1         1
+    ##  2 a1        2         1
+    ##  3 a1        3         1
+    ##  4 a1        4         1
+    ##  5 a1        5         1
+    ##  6 a1        6         1
+    ##  7 a1        7         1
+    ##  8 a1        8         1
+    ##  9 a1        9         1
+    ## 10 a1        10        1
+    ## # … with 230 more rows
 
-### Fourth step: Plot
+Finally, we can get the mean of observed ASVs with `asvs_mean()`
+fuction.
+
+``` r
+obs_mean <- mutate(
+  obs_nest, mean_asv = map_dbl(.x = data, .f = asvs_mean)
+) %>% 
+  select(-data)
+
+# Convert depth_seqs in a numeric variable
+obs_mean$depth_seqs <- sapply(obs_mean$depth_seqs, as.numeric)
+
+head(obs_mean)
+```
+
+    ## # A tibble: 6 × 3
+    ## # Groups:   depth_seqs, site [6]
+    ##   site  depth_seqs mean_asv
+    ##   <chr>      <dbl>    <dbl>
+    ## 1 A              1       1 
+    ## 2 A           1800     461.
+    ## 3 A           3600     626.
+    ## 4 A           5400     723.
+    ## 5 A           7200     789.
+    ## 6 A           9000     838.
+
+## Third step: Plot
 
 Finally just plot the last object.
 
 ``` r
-ggplot(obs3, aes(x = depth, 
-                 y = mean,
-                 group = category,
-                 color = category)) +
-    geom_line() +
-    geom_point(alpha = 0.5)+
-    theme_bw() +
-    theme(legend.position = "bottom")+
-    labs(x =" Depth sequencing", 
-         y = "ASVs observed") 
+obs_mean %>% 
+  ggplot(aes(x = depth_seqs,
+             y = mean_asv, 
+             color = site)) +
+  geom_line() +
+  geom_point(alpha = 0.5) +
+  theme_bw() 
 ```
 
-![](rarefy_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](rarefy_example_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
-Or you could add another column with more categories like site or
-treatment and get a plot with more information.
+## To plot each sample
 
 ``` r
-obs3 %<>% mutate(site = ifelse(grepl("^a", .$category), "A", "B"))
-head(obs3)
+# Group by sample_id
+obs_sample <- obs_long %>% 
+  group_by(depth_seqs, sample_id) %>% 
+  nest()
+
+# Get mean of asvs by sample
+obs_mean_sample <- mutate(
+  obs_sample, mean_asv = map_dbl(.x = data, .f = asvs_mean)
+) %>% 
+  select(-data)
+
+# Convert depth_seqs in a numeric variable
+obs_mean_sample$depth_seqs <- sapply(obs_mean_sample$depth_seqs, as.numeric)
+
+# Check dataset
+head(obs_mean_sample)
 ```
 
-    ##   category  mean        sd depth site
-    ## 1       a1   1.0  0.000000     1    A
-    ## 2       a1 888.4  4.351245 10800    A
-    ## 3       a1 900.3  4.831609 12600    A
-    ## 4       a1 909.9  3.754997 14400    A
-    ## 5       a1 914.2  3.011091 16200    A
-    ## 6       a1 589.0 11.303883  1800    A
-
-Plot
+    ## # A tibble: 6 × 3
+    ## # Groups:   depth_seqs, sample_id [6]
+    ##   sample_id depth_seqs mean_asv
+    ##   <chr>          <dbl>    <dbl>
+    ## 1 a1                 1       1 
+    ## 2 a1              1800     589 
+    ## 3 a1              3600     750.
+    ## 4 a1              5400     808.
+    ## 5 a1              7200     848.
+    ## 6 a1              9000     873.
 
 ``` r
-ggplot(obs3, aes(x = depth, 
-                 y = mean,
-                 group = category,
-                 color = site)) +
-    geom_line() +
-    geom_point(alpha = 0.5)+
-    theme_bw() +
-    theme(legend.position = "bottom")+
-    labs(x =" Depth sequencing", 
-         y = "ASVs observed") 
+# plot
+obs_mean_sample %>% 
+  ggplot(aes(x = depth_seqs,
+             y = mean_asv, 
+             color = sample_id)) +
+  geom_line() +
+  geom_point(alpha = 0.5) +
+  theme_bw()
 ```
 
-![](rarefy_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](rarefy_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->

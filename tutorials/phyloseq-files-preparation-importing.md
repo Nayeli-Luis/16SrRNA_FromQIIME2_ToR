@@ -1,12 +1,14 @@
 Files preparation and importing to `phyloseq`
 ================
-Luis-Vargas Maira N
+Luis-Vargas, Maira N.
+
+email: <nayeli.luis@ciencias.unam.mx>
 
 ## What is `phyloseq`?
 
 `phyloseq` is a R package which brings tools in order to analyse
 microbial communities from many types of data. The Github of `phyloseq`
-([click here](https://joey711.github.io/phyloseq/)), has many tutorials
+([click here](https://joey711.github.io/phyloseq/), has many tutorials
 for make several analysis and data visualization. But, in my opinion, is
 unclear how the data must be imported, in this tutorial I hope to show
 an easy way to import data for using `phyloseq`.
@@ -22,9 +24,9 @@ From these file, we will create others, which are the ones that will be
 import into `phyloseq`. These are: `feature-table.tsv` and
 `otu_tax_matrix.csv`.
 
-## Data preparation
+## The preparation
 
-### feature-table.tsv\`
+### `feature-table.tsv`
 
 To get the `feature-table.tsv` file we need to transform the `biom`
 file. If you want to know what a biom file is, yo can go to the [Biom
@@ -40,8 +42,8 @@ The `.tsv` file looks like this:
 library(tidyverse)
 library(magrittr)
 
-otu <- read.table("datasets/feature-table.tsv", sep = "\t")
-head(otu)
+asv_table <- read.table("../datasets/feature-table.tsv", sep = "\t")
+head(asv_table)
 ```
 
     ##                                 V1  V2 V3 V4    V5    V6   V7 V8   V9  V10  V11
@@ -73,21 +75,21 @@ head(otu)
     ## 5 22611 4576    0    0    0   0 176 464
     ## 6   110  161    0    0    0   0  49 130
 
-The first column is the OTUID and the next ones are the samples. So, the
-next step is put column names and we can do this importing the
-`sample-metadata.csv` file, passing the names of the samples as
-columnames.
+The first column is the FeatureID (ASV) and the next ones are the
+samples. So, the next step is put column names and we can do this
+importing the `sample-metadata.csv` file, passing the names of the
+samples as columnames.
 
 ``` r
-metadata <- read.csv("datasets/sample-metadata.csv", row.names = 1)
+metadata <- read.csv("../datasets/sample-metadata.csv", row.names = 1)
 sample.names <- rownames(metadata)
 
-colnames(otu) <- c("OTUID", sample.names)
+colnames(asv_table) <- c("Feature.ID", sample.names)
 
-head(otu)
+head(asv_table)
 ```
 
-    ##                              OTUID  A1 A2 A3    A4    A5   A6 A7   A8   A9  A10
+    ##                         Feature.ID  A1 A2 A3    A4    A5   A6 A7   A8   A9  A10
     ## 1 7316c3832ec38cd0495800fdb90ee8b6   0  0  0 10218  8097 3945  0 3752 7435 6179
     ## 2 45500d433aca766bd01414417f075e13   0  0  0 28819 88824 1058  0  110  268  214
     ## 3 0c4044221ce447bccf82e751ba1d0d8c   0  0  0 15193 29690 2193 34  378 1055  860
@@ -116,7 +118,7 @@ head(otu)
     ## 5 22611 4576    0    0    0   0 176 464
     ## 6   110  161    0    0    0   0  49 130
 
-Our first file (`feature-table.tsv`) is ready\!
+Our first file (`feature-table.tsv`) is ready!
 
 ### `otu_tax_matrix.csv`.
 
@@ -129,7 +131,7 @@ First, the `taxonomy.tsv` has three columns: `Feature.ID`, `Taxon` and
 `Confidence`.
 
 ``` r
-tax <- read.table("datasets/taxonomy.tsv", sep = '\t', header = T)
+tax <- read.table("../datasets/taxonomy.tsv", sep = '\t', header = T)
 colnames(tax)
 ```
 
@@ -143,7 +145,6 @@ columns.
 ``` r
 tax %<>% 
   select(-Confidence) %>%
-  rename(OTUID = Feature.ID) %>%
   separate(Taxon, c("Kingdom", "Phylum"), sep = "; p__") %>%
   separate(Phylum, c("Phylum", "Class"), sep = "; c__") %>%
   separate(Class, c("Class", "Order"), sep = "; o__") %>%
@@ -158,7 +159,7 @@ tax$Kingdom <- sub (pattern = "d__", replacement = "",
 head(tax)
 ```
 
-    ##                              OTUID  Kingdom           Phylum
+    ##                         Feature.ID  Kingdom           Phylum
     ## 1 7316c3832ec38cd0495800fdb90ee8b6 Bacteria   Proteobacteria
     ## 2 45500d433aca766bd01414417f075e13 Bacteria Actinobacteriota
     ## 3 0c4044221ce447bccf82e751ba1d0d8c Bacteria Actinobacteriota
@@ -180,41 +181,85 @@ head(tax)
     ## 5 uncultured_bacterium
     ## 6                 <NA>
 
-And, we’ll merge the datasets.
+And, we’ll merge the datasets. In order to have all de taxonomy with the
+number of seqs by ASV and by sample.
 
 ``` r
-otu_tax_matrix <- merge(x = otu, y = tax, by = "OTUID")
+asv_matrix <- merge(x = asv_table, y = tax, by = "Feature.ID")
+head(asv_matrix)
 ```
+
+    ##                         Feature.ID A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13
+    ## 1 00036a009561f213d4ce34976272a74e  0  0  0  0 14  0  0  0  0   0   0   0   0
+    ## 2 000492f90810f8c40399573f9b78fbf4  0  0  0 28 26  0  0  0  0   0   0   0   0
+    ## 3 0006d142c7d8d12f6a25328b73d993b3  0  0  0  8  0  0  0  0  0   0   0   0   0
+    ## 4 000c2c548d916008a072ecb085317efb  0  0  0  0 23  0  0  0  0   0   0   0   0
+    ## 5 000fd226d21abb5d0c38bfb05f7e9fa5  0  0  0  0  0  0  0  0  0   0   0   0   0
+    ## 6 00130d1108179cf86d8ef16c2858f706  0  0  0  0  0  0  0  0  0   0   0   0   0
+    ##   A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 B1 B2 B3 B4 B5 B6 B7 B8 B9 B10
+    ## 1   0   0   0  13   0   0   0   0   0   0   0  0  0  0  0  0  0  0  0  0   0
+    ## 2   0   0   0   0   0   0   0   0   0   0   0  0  0  0  0  0  0  0  0  0   0
+    ## 3   0   0   0   0   0   0   0   0   0   0   0  0  0  0  0  0  0  0  0  0   0
+    ## 4   0   0   0   0   0   0   0   0   0   0   0  0  0  0  0  0  0  0  0  0   0
+    ## 5   0   0   0   0   0   0   0   0   0   0   0  0  0  0  0  0  9  0  0  0   0
+    ## 6   0   0   0   0   0   0   0   0   0   0   0  0  0  0  0  0  0  0  0  0   0
+    ##   B11 B12 B13 B14 B15 B16 B17 B18 B19 B20 B21 B22 B23 B24  Kingdom
+    ## 1   0   0   0   0   0   0   0   0   0   0   0   0   0   0 Bacteria
+    ## 2   0   0   0   0   0   0   0   0   0   0   0   0   0   0 Bacteria
+    ## 3   0   0   0   0   0   0   0   0   0   0   0   0   0   0 Bacteria
+    ## 4   0   0   0   0   0   0   0   0   0   0   0   0   0   0 Bacteria
+    ## 5   0   0   0   0   0   0   0   0   0   0   0   0   0   0 Bacteria
+    ## 6   0   0   0   0   0   0   0  18   0   0   0   0   0   0 Bacteria
+    ##             Phylum               Class                 Order
+    ## 1 Desulfobacterota          uncultured            uncultured
+    ## 2            NB1-j               NB1-j                 NB1-j
+    ## 3      Myxococcota         bacteriap25           bacteriap25
+    ## 4   Proteobacteria Alphaproteobacteria   Paracaedibacterales
+    ## 5   Proteobacteria Alphaproteobacteria      Rhodospirillales
+    ## 6       Firmicutes             Bacilli Thermoactinomycetales
+    ##                   Family               Genus                      Specie
+    ## 1             uncultured          uncultured                  metagenome
+    ## 2                  NB1-j               NB1-j             uncultured_soil
+    ## 3            bacteriap25         bacteriap25            uncultured_delta
+    ## 4   Paracaedibacteraceae Candidatus_Captivus        uncultured_bacterium
+    ## 5             uncultured          uncultured uncultured_Rhodospirillales
+    ## 6 Thermoactinomycetaceae          Planifilum        uncultured_bacterium
 
 ## Importing datasets to `phyloseq`
 
-Finally, we can import our data to `phyloseq`
+Finally, we can import our data to `phyloseq`:
 
 ``` r
 library(phyloseq)
 
-# Column OTUID as rownames in the df otu
-rownames(otu) <- otu$OTUID
-otu %<>% select(-OTUID)
+# Column Feature.ID as rownames in the asv_table
+rownames(asv_table) <- asv_table$Feature.ID
+asv_table %<>% select(-Feature.ID)
 
-# Column OTUID as rownames in the df otu_tax_matrix 
-rownames(otu_tax_matrix) <- otu_tax_matrix$OTUID
-otu_tax_matrix %<>%
-  select(-OTUID) %>%
+# Column Feature.ID as rownames in the df taxonomy
+rownames(tax) <- tax$Feature.ID
+tax %<>%
+  select(-Feature.ID) %>%
    as.matrix(.) # Convert to a matrix
 
 
-OTU <- otu_table(otu, taxa_are_rows = TRUE)
-TAX <- tax_table(otu_tax_matrix)
+ASV <- otu_table(asv_table, taxa_are_rows = TRUE)
+TAX <- tax_table(tax)
 metadata <- sample_data(metadata)
-phy_tree <- read_tree("datasets/tree.nwk")
+phy_tree <- read_tree("../datasets/tree.nwk")
 
-phyloseq_object <- phyloseq(OTU, TAX, metadata, phy_tree)
+phyloseq_object <- phyloseq(ASV, TAX, metadata, phy_tree)
 phyloseq_object
 ```
 
     ## phyloseq-class experiment-level object
     ## otu_table()   OTU Table:         [ 16536 taxa and 48 samples ]
     ## sample_data() Sample Data:       [ 48 samples by 2 sample variables ]
-    ## tax_table()   Taxonomy Table:    [ 16536 taxa by 55 taxonomic ranks ]
+    ## tax_table()   Taxonomy Table:    [ 16536 taxa by 7 taxonomic ranks ]
     ## phy_tree()    Phylogenetic Tree: [ 16536 tips and 16511 internal nodes ]
+
+I recommend you to save this physeq object as a RDS
+
+``` r
+ps <- saveRDS(phyloseq_object, "../datasets/phyloseq_object.RDS")
+```
