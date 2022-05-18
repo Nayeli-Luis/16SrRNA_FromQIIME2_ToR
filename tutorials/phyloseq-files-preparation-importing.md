@@ -261,5 +261,5 @@ phyloseq_object
 I recommend you to save this physeq object as a RDS
 
 ``` r
-ps <- saveRDS(phyloseq_object, "../datasets/phyloseq_object.RDS")
+saveRDS(phyloseq_object, "../datasets/phyloseq_object.RDS")
 ```
